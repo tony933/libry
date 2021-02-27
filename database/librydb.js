@@ -1,5 +1,7 @@
-const { Module } = require('module');
-const mysql = require('mysql');
+const { Module } = require('module'),
+ mysql = require('mysql'),
+ { promisify }  = require('util');
+
 // connection in databases mysql
 var pool  = mysql.createPool({
 host:  process.env.DB_HOST,
@@ -15,4 +17,6 @@ if (err) {
 }
 
 })
-module.exports = pool
+const promiseQuery = promisify(pool.query).bind(pool);
+
+module.exports = promiseQuery

@@ -1,20 +1,22 @@
+require('dotenv').config();
 const express = require('express'),
     app = express(),
     port = 7000;
-    const bodyParser = require('body-parser'),
-    cookieParser = require("cookie-parser");
-    const  dotenv = require("dotenv");
+     bodyParser = require('body-parser'),
 //===========
 // Middleware
 //===========
-    dotenv.config({ path: './.env' });
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(bodyParser.json({ limit: "50mb" }));
-    app.use(cookieParser());
+    app.use((req , res , next)=>{
+        if(!req.is('application/json'))
+            return res.status(400).json({error: "\' Request \' the type of request is not supported!"});
+        next();
+    })
 //===========
 //  Routes
 //===========
-app.use('/', require("./route/routes"));
+app.use('/', require("./route/routes"));5
 
 //===========
 //  CONECTIN PORT
