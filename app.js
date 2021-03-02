@@ -16,7 +16,7 @@ const express = require('express'),
 //===========
 //  Routes
 //===========
-app.use('/', require("./route/routes"));5
+app.use('/', require("./route/routes"));
 
 //===========
 //  CONECTIN PORT
