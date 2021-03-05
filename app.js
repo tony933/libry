@@ -8,11 +8,11 @@ const express = require('express'),
 //===========
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(bodyParser.json({ limit: "50mb" }));
-    app.use((req , res , next)=>{
-        if(!req.is('application/json'))
-            return res.status(400).json({error: "\' Request \' the type of request is not supported!"});
-        next();
-    })
+    // app.use((req , res , next)=>{
+    //     if(!req.is('application/json'))
+    //         return res.status(400).json({error: "\' Request \' the type of request is not supported!"});
+    //     next();
+    // })
 //===========
 //  Routes
 //===========
@@ -22,7 +22,7 @@ app.use('/', require("./route/routes"));
 //  CONECTIN PORT
 //===========
 app.listen(port, () => {
-    console.log("it work")
+    console.log("it work") 
 
 
 })

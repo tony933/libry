@@ -5,6 +5,9 @@ var express = require('express'),
  jwt = require('jsonwebtoken'),
  jwt_decode = require('jwt-decode'),
  tookendekod = "",
+  categoryid ="",
+bookid="",
+authorid="",
  { registerValidation, loginValidation } = require('../validation/validation');
 //=========
 //Registration Route 
@@ -69,37 +72,68 @@ return decoded.id;
 //category Route
 //=========
   router.post('/category', async(req, res) => {
-    const {Name} = req.body;
-var id_decode = jwtdecod()
+    const {categoryName ,name_book , year_book , numper_book , dec_book , indx_book , book_image,authorName} = req.body;
+    console.log(year_book)
+var id_decode = jwtdecod();
  //check category Existence
- const result = await promiseQuery( 'SELECT category_name FROM category WHERE category_name = ?' , [Name] );
-if (result.length>0) return res.status(200).json({ categoryExistence: "category is  exists" });
+ const result = await promiseQuery( 'SELECT * FROM category WHERE category_name = ?' , [categoryName] );
+
+if (result.length>0) {
+    categoryid = result[0].category_id;
+    console.log(categoryid);
+}else{
 var sql = "INSERT INTO category (category_name,user_id ) VALUES ?";
 //Make an array of values:
 var values = [
-    [ Name , id_decode ],
+    [ categoryName , id_decode ],
 ];
 //Execute the SQL statement, with the value array:
 const register = await promiseQuery( sql, [values] );
-if (register) return res.status(200).json({ categoryregist: "successful" });
-})
-
-
-router.post('/book', async(req, res) => {
-const {name_book , year_book , numper_book , dec_book , indx_book , book_image} = req.body;
-var id_decode = jwtdecod()
- const result = await promiseQuery( 'SELECT * FROM category WHERE user_id = ?' , [id_decode] );
- console.log(result)
- var sql = "INSERT INTO book (book_name,user_id,category_id,book_year,book_nopages,book_description,book_index,book_image ) VALUES ?";
+categoryid = register.insertId;
+}
+//=========
+//book Route
+//=========
+ var sqlbook = "INSERT INTO book (book_name,user_id,category_id,book_year,book_nopages,book_description,book_index,book_image ) VALUES ?";
  //Make an array of values:
  var values = [
-     [ name_book ,result[0].user_id,result[0].category_id, year_book , numper_book , dec_book , indx_book , book_image ],
+     [ name_book ,id_decode,categoryid, year_book , numper_book , dec_book , indx_book , book_image ],
  ];
  //Execute the SQL statement, with the value array:
- const register = await promiseQuery( sql, [values] );
- if (register) return res.status(200).json({ bookregist: "successful" });
+ const registerbook = await promiseQuery( sqlbook, [values] );
+bookid = registerbook.insertId;
+console.log(bookid)
+//=========
+//author Route
+//=========
+// check author Existence
+const resultauthor = await promiseQuery( 'SELECT * FROM author WHERE author_name = ?' , [authorName] );
+if (resultauthor.length>0) { 
+    authorid = resultauthor[0].author_id;
+    console.log(authorid);
+}else{
+var sqlauthor = "INSERT INTO author (author_name,user_id ) VALUES ?";
+//Make an array of values:
+var values = [
+    [ authorName , id_decode ],
+];
+//Execute the SQL statement, with the value array:
+const registerauthor = await promiseQuery( sqlauthor, [values] );
+authorid = registerauthor.insertId;
+console.log(authorid)
+}
+
+var sqlauthorbook = "INSERT INTO author_book (author_id,book_id ) VALUES ?";
+//Make an array of values:
+var values = [
+    [ authorid , bookid ],
+];
+//Execute the SQL statement, with the value array:
+const registerauthorbook = await promiseQuery( sqlauthorbook, [values] );
+if (registerauthorbook) return res.status(200).json({ ok: "successful" });
 })
-
-
-
+router.get('/get', async (req, res) => {
+    const result = await promiseQuery('select author.author_name ,book.book_name ,book.book_year,book.book_nopages ,book.book_description,book.book_index,book.book_image from author_book inner join author on (author.author_id =author_book.author_id ) inner join book on (book.book_id = author_book.book_id)');
+    res.json(result);
+});
 module.exports = router
